@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="965478c1-3db2-44ac-b793-630650ffc32c" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="parallel-for-each-demoFlow" doc:id="5cd84056-b427-45db-be8c-6cc042a3ef91" >
+		<http:listener doc:name="Listener" doc:id="4382db29-de71-4f2a-93f2-75ab9ed4a9fa" config-ref="HTTP_Listener_config" path="demo"/>
+		<ee:transform doc:name="input json" doc:id="8926cb26-aa6c-4313-b2d6-7859a721eeef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[
+   {
+      "id": "bk101",
+      "author": "Gambardella, Matthew",
+      "title": "XML Developer's Guide",
+      "genre": "Computer",
+      "price": "44.95",
+      "publish_date": "2000-10-01"
+      
+   },
+   {
+      "id": "bk102",
+      "author": "Ralls, Kim",
+      "title": "Midnight Rain",
+      "genre": "Fantasy",
+      "price": "5.95",
+      "publish_date": "2000-12-16"
+   },
+   {
+      "id": "bk103",
+      "author": "Corets, Eva",
+      "title": "Maeve Ascendant",
+      "genre": "Fantasy",
+      "price": "5.95",
+      "publish_date": "2000-11-17"
+   },
+   {
+      "id": "bk104",
+      "author": "Corets, Eva",
+      "title": "Maeve Ascendant",
+      "genre": "Fantasy",
+      "price": "5.95",
+      "publish_date": "2000-11-17"
+   }
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<parallel-foreach doc:name="parallel-For-Each" collection="payload">
+          <ee:transform doc:name="Transform Message" doc:id="bdc36361-a250-4041-bd6d-40926773edd3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.id ++ now()]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+        </parallel-foreach>
+		<ee:transform doc:name="aggregated response" doc:id="0bde3d2e-3485-4511-9533-ef137f41e94e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map $.payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		
+	</flow>
+</mule>
